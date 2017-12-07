@@ -74,6 +74,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="FunctionParser.cs" />
+    <Compile Include="Matrix.cs" />
     <Compile Include="MinFinder.cs" />
     <Compile Include="OneDimMinFinder.cs" />
     <Compile Include="Point.cs" />

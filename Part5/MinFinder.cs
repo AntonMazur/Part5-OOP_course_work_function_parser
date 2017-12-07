@@ -213,6 +213,7 @@ namespace Part5
             return (((currG - prevG) * currG)/(prevG * prevG));
         }
 
+
         private void initDTConjGrad()
         {  
             dt.Columns.AddRange(new DataColumn[] 
