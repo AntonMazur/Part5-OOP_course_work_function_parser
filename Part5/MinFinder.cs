@@ -95,7 +95,7 @@ namespace Part5
         public Point findMin()
         {
             initDTPaulaMeth();
-            return M_Paula();
+            return M_Paula2();
         }
 
         public double func(Point point)
@@ -107,6 +107,16 @@ namespace Part5
         {
             Point.normalize(direction);
             return (func(point + 1e-12 * direction) - func(point)) / 1e-12;
+        }
+
+        public double df_2(Point point, int df1_dimNum, int df2_dimNum)
+        {
+            Point df1Direc = new Point(point.dim);
+            df1Direc.setCoord(df1_dimNum, 1);
+            Point df2Direc = new Point(point.dim);
+            df2Direc.setCoord(df2_dimNum, 1);
+
+            return (df(point, df1Direc) - df(point + 1e-12 * df2Direc, df1Direc)) / 1e-12;
         }
 
         public Point grad(Point point)
@@ -122,53 +132,107 @@ namespace Part5
             return new Point(gradCoords);
         }
 
+        public Matrix getHessianMatr(Point point)
+        {
+            int dim = point.dim;
+            double[,] hesArr = new double[dim, dim];
+            for (int i = 0; i < dim; i++)
+            {
+                for (int j = 0; j <= i; j++)
+                {
+                    hesArr[i, j] = df_2(point, i, j);
+                    hesArr[j, i] = hesArr[i, j];
+                }
+            }
+
+            return new Matrix(hesArr);
+        }
+
+        public Matrix getIdentityMatr(int dim)
+        {
+            double[,] identityArr = new double[dim, dim];
+            for (int i = 0; i < dim; i++)
+            {
+                identityArr[i, i] = 1;
+            }
+
+            return new Matrix(identityArr);
+        }
+
         private Point M_PolakaRibiere()
         {
+
+            /**
+             * kVals - объект структуры, который хранит ключевые значения,
+             * используемые в методе, в данном случае это текущая точка,
+             * градиент на текущей и на прошлой итерациях,
+             * направление на текущей и на прошлой итерациях
+             * и уже сделанное количество итераций
+             */
+
+            //вычисление значения функции в текущей точке
             double fVal = func(kVals.currPoint);
+            //вычисление градиента в текущей точке
             kVals.currGrad = grad(kVals.currPoint);
+            //нахождение направления одномерного поиска из текущей точки
             kVals.currDirection = -kVals.currGrad;
 
+            //добавление в направление поиска ещё одного члена: коэффициентом beta * направление поиска на предыдущем шаге
+            //если текущий шаг не кратен количеству переменных в функции
             if (kVals.iter % kVals.currPoint.dim != 0)
             {
                 kVals.currDirection +=
                     computePolRib_beta(kVals.currGrad, kVals.prevGrad) * kVals.prevDirection;
             }
 
+            //вычисление результата однгомерного поиска по заданному направлению
             kVals.currPoint = new OneDimMinFinder(kVals.currPoint, kVals.currDirection, fPars).findMin();
 
+            //сохранение значения градиента(т.к. при вычислении beta используются градиенты на текущей и предыдущей итерации)
             kVals.prevGrad = kVals.currGrad;
+            //сохранение направления
             kVals.prevDirection = kVals.currDirection;
             kVals.iter++;
 
+            // не имеет никакого отношщения к алгоритму, сохранение значения ключевых переменных для последующего вывода
             addKeyValsToTable(
                 kVals.iter,
                 kVals.currPoint.ToString(),
                 kVals.currGrad.ToString(),
                 kVals.currDirection.ToString());
 
+            //проверка условий окончания поиска, в случае их не выполнения –
+            //рекурсивный вызов этого метода со значениями полученными на текущей итерации
             return (Point.norm(kVals.currGrad) > EPS && kVals.iter < MAX_ITER) ? M_PolakaRibiere() : kVals.currPoint;
 
         }
 
-        private Point M_Paula()
+        private Point M_Paula1()
         {
+
+            //создание объекта для одномерного поиска
             OneDimMinFinder mF = new OneDimMinFinder(fPars);
+            // получение количетсва переменных и создание одномерного масива орт по каждому из измерений 
+            //(для dim = 2, directions = {{1,0}, {0,1}}
             int dim = fPars.getDimensionality();
-            Point[] directions = initStartDirsCGD(dim);
+            Point[] directions = initStartDirsCGD(dim, dim);
 
             do
             {
+                //сохранение значения в текущей точке(далее будет использовано для нахождения нового направления поиска)
                 kVals.prevPoint = kVals.currPoint;
 
+                // одномерный последовательный поиск по массиву направлений
                 for (int i = 0; i < dim; i++)
                 {
                     kVals.currPoint = mF.setStartPoint(kVals.currPoint).setDirection(directions[i]).findMin();
                 }
 
-
+                // нахождение нового направления поиска
                 Point newDir = kVals.currPoint - kVals.prevPoint;
                 
-                mPaulaAddDirection(directions, newDir);
+                // добавление нового направления в матрицу поисковых векторов
+                mPaula1AddDirection(directions, newDir);
                 kVals.currPoint = mF
                     .setStartPoint(kVals.currPoint)
                     .setDirection(newDir)
@@ -176,6 +240,7 @@ namespace Part5
 
                 kVals.iter++;
 
+                // никак не относится к алгоритму
                 addKeyValsToTable(
                     kVals.iter,
                     kVals.currPoint.ToString(),
@@ -186,7 +251,8 @@ namespace Part5
             return kVals.currPoint;
         }
 
-        private void mPaulaAddDirection(Point[] directions, Point dir)
+        // метод для сдвига всех направлений вправо на 1 и добавления нового направления на место последнего
+        private void mPaula1AddDirection(Point[] directions, Point dir)
         {
             for (int i = 0; i < directions.Length - 1; i++)
             {
@@ -195,16 +261,63 @@ namespace Part5
             directions[directions.Length - 1] = dir;
         }
 
-        private Point[] initStartDirsCGD(int dim)
+        private Point[] initStartDirsCGD(int dim, int dirsCount)
         {
-            Point[] initDirections = new Point[dim];
-            for (int i = 0; i < dim; i++)
+            Point[] initDirections = new Point[dirsCount];
+            for (int i = 0; i < dirsCount; i++)
             {
                 Point p = new Point(dim);
                 p.setCoord(i, 1);
                 initDirections[i] = p;
             }
             return initDirections;
+        }
+
+        private Point M_Paula2()
+        {
+
+            //создание объекта для одномерного поиска
+            OneDimMinFinder mF = new OneDimMinFinder(fPars);
+            // получение количетсва переменных и создание одномерного масива орт по каждому из измерений 
+            //(для dim = 2, directions = {{1,0}, {0,1}}
+            int dim = fPars.getDimensionality();
+            Point[] directions = initStartDirsCGD(dim, dim + 1);
+            directions[dim] = directions[0];
+
+            do
+            {
+                kVals.currPoint = mF.setStartPoint(kVals.currPoint).setDirection(directions[0]).findMin();
+                //сохранение значения в текущей точке(далее будет использовано для нахождения нового направления поиска)
+                kVals.prevPoint = kVals.currPoint;
+
+                // одномерный последовательный поиск по массиву направлений
+                for (int i = 1; i <= dim; i++)
+                {
+                    kVals.currPoint = mF.setStartPoint(kVals.currPoint).setDirection(directions[i]).findMin();
+                }
+
+                // нахождение нового направления поиска
+                Point newDir = kVals.currPoint - kVals.prevPoint;
+
+                // добавление нового направления в матрицу поисковых векторов
+                mPaula1AddDirection(directions, newDir);
+                directions[0] = newDir;
+                kVals.currPoint = mF
+                    .setStartPoint(kVals.currPoint)
+                    .setDirection(newDir)
+                    .findMin();
+
+                kVals.iter++;
+
+                // никак не относится к алгоритму
+                addKeyValsToTable(
+                    kVals.iter,
+                    kVals.currPoint.ToString(),
+                    newDir.ToString());
+
+            } while (kVals.iter < dim);
+
+            return kVals.currPoint;
         }
 
 
