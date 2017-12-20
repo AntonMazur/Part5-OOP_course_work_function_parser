@@ -157,9 +157,9 @@ namespace Part5
             }
         }
 
-        public static void normalize(Point direction)
+        public static Point normalize(Point direction)
         {
-            direction /= Point.norm(direction);
+            return direction / Point.norm(direction);
         }
 
     }

@@ -29,9 +29,9 @@ namespace Part5
 
     class OneDimMinFinder
     {
-        private const double EPS = 1e-7;
+        private const double EPS = 1e-14;
         private const double DELTA = EPS * 0.1;
-        private const int MAX_ITER = 30;
+        private const int MAX_ITER = 40;
 
 
 
@@ -64,8 +64,8 @@ namespace Part5
 
         public Point findMin()
         {
-            Interval interv = swan(0, 0.01);
-            double step = dichtomy(interv.a, interv.b, 0);
+            Interval interv = swan1(0, 0.01);
+            double step = DSK(interv.a, interv.b, 0);
             return startPoint + step * direction;
         }
 
@@ -74,7 +74,31 @@ namespace Part5
             return fPars.computeFuncVal((startPoint + step * direction).getCoords());
         }
 
-        public Interval swan(double startP, double h)
+        private double df(double step)
+        {
+            return (func(step + 1e-14) - func(step)) / 1e-14;
+        }
+
+        private Interval swan2(double startP, double h)
+        {
+            double prevP;
+            double currP;
+            if (df(startP) > 0)
+            {
+                h = -h;
+            }
+            prevP = startP;
+            currP = startP + h;
+            while (df(currP) * df(prevP) > 0)
+            {
+                h *= 2;
+                prevP = currP;
+                currP += h;
+            }
+            return new Interval(prevP, currP);
+        }
+
+        private Interval swan1(double startP, double h)
         {
             double prevP;
             double currP;
@@ -98,7 +122,19 @@ namespace Part5
             return new Interval(prevP - h / 2, currP);
         }
 
-        double dichtomy(double a, double b, int iter)
+        private double bolzano(double a, double b, int iter)
+        {
+            double midP = (a + b) / 2;
+            if (((Math.Abs(b - a) < EPS) && (Math.Abs(df(midP)) < EPS)) || (iter == MAX_ITER))
+                return (a + b) / 2;
+            if (df(midP) > 0)
+                b = midP;
+            else
+                a = midP;
+            return bolzano(a, b, ++iter);
+        }
+
+        private double dichtomy(double a, double b, int iter)
         {
             double midP = (a + b) / 2;
             if ((iter == MAX_ITER) || (Math.Abs(b - a) < EPS))
@@ -112,6 +148,26 @@ namespace Part5
             return func(l) < func(m)
                    ? dichtomy(a, m, ++iter)
                    : dichtomy(l, b, ++iter);
+        }
+
+        private double DSK(double x, double h, int iter)
+        {
+            if ((Math.Abs(df(x)) < EPS) || (iter == MAX_ITER))
+            {
+                return x;
+            }
+            Interval afterSwan = swan2(x, h);
+            x = (afterSwan.b + afterSwan.a) / 2;
+            double d = d_4(afterSwan.a, x, afterSwan.b);
+            return func(d) < func(x)
+                   ? DSK(d, h / 2, ++iter)
+                   : DSK(x, h / 2, ++iter);
+        }
+
+        private double d_4(double a, double b, double c)
+        {
+            return b + ((b - a) * (func(a) - func(c))) /
+                   (2 * (func(a) - 2 * func(b) + func(c)));
         }
 
     }

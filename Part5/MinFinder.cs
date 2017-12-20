@@ -1,4 +1,4 @@
-п»їusing System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -95,7 +95,7 @@ namespace Part5
         public Point findMin()
         {
             initDTPaulaMeth();
-            return M_Paula2();
+            return M_Pirson_3();
         }
 
         public double func(Point point)
@@ -105,8 +105,7 @@ namespace Part5
 
         private double df(Point point, Point direction)
         {
-            Point.normalize(direction);
-            return (func(point + 1e-12 * direction) - func(point)) / 1e-12;
+            return (func(point + 1e-14 * direction) - func(point)) / 1e-14;
         }
 
         public double df_2(Point point, int df1_dimNum, int df2_dimNum)
@@ -159,79 +158,158 @@ namespace Part5
             return new Matrix(identityArr);
         }
 
-        private Point M_PolakaRibiere()
+        private Point M_Pirson_3()
+        {
+            OneDimMinFinder minFinder = new OneDimMinFinder(fPars);
+            Matrix a = null;
+
+            do
+            {
+                // preservarion previous gradient's value
+                kVals.prevGrad = kVals.currGrad;
+                // calculation new gradient's value
+                kVals.currGrad = grad(kVals.currPoint);
+                if (kVals.iter % kVals.currPoint.dim != 0)
+                {
+                    // calculation new matrix of quasi-Newtonian's directions 
+                    a = calculateMatrixPirs3(kVals, a);
+                    // calculation new direction for one-dimensionality's search 
+                    kVals.currDirection = -(a * kVals.currGrad);
+                }
+                else{
+                    // initializing with identity matrix
+                    a = getIdentityMatr(kVals.currPoint.dim);
+                    // calculation new direction for one-dimensionality's search 
+                    kVals.currDirection = -kVals.currGrad;
+                }
+                //preservation of previous point
+                kVals.prevPoint = kVals.currPoint;
+                // one-dimensionality's search
+                kVals.currPoint = minFinder.setStartPoint(kVals.currPoint).setDirection(kVals.currDirection).findMin();
+                kVals.iter++;
+                addKeyValsToTable(
+                    kVals.iter,
+                    kVals.currPoint.ToString(),
+                    kVals.currDirection.ToString());
+
+            } while (kVals.iter != MAX_ITER && Point.norm(kVals.prevPoint - kVals.currPoint) > EPS);
+
+            return kVals.currPoint;
+
+        }
+
+        private Matrix calculateMatrixPirs3(KeyVals kvals, Matrix a)
+        {
+            Point gamma = kvals.currGrad - kvals.prevGrad;
+            Point diff = kvals.currPoint - kvals.prevPoint;
+            Point s = a * diff;
+            return a + ((diff - s) * s) / (s * diff);
+        }
+
+        private Point M_ConjagateGrads()
         {
 
             /**
-             * kVals - РѕР±СЉРµРєС‚ СЃС‚СЂСѓРєС‚СѓСЂС‹, РєРѕС‚РѕСЂС‹Р№ С…СЂР°РЅРёС‚ РєР»СЋС‡РµРІС‹Рµ Р·РЅР°С‡РµРЅРёСЏ,
-             * РёСЃРїРѕР»СЊР·СѓРµРјС‹Рµ РІ РјРµС‚РѕРґРµ, РІ РґР°РЅРЅРѕРј СЃР»СѓС‡Р°Рµ СЌС‚Рѕ С‚РµРєСѓС‰Р°СЏ С‚РѕС‡РєР°,
-             * РіСЂР°РґРёРµРЅС‚ РЅР° С‚РµРєСѓС‰РµР№ Рё РЅР° РїСЂРѕС€Р»РѕР№ РёС‚РµСЂР°С†РёСЏС…,
-             * РЅР°РїСЂР°РІР»РµРЅРёРµ РЅР° С‚РµРєСѓС‰РµР№ Рё РЅР° РїСЂРѕС€Р»РѕР№ РёС‚РµСЂР°С†РёСЏС…
-             * Рё СѓР¶Рµ СЃРґРµР»Р°РЅРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РёС‚РµСЂР°С†РёР№
+             * kVals - объект структуры, который хранит ключевые значения,
+             * используемые в методе, в данном случае это текущая точка,
+             * градиент на текущей и на прошлой итерациях,
+             * направление на текущей и на прошлой итерациях
+             * и уже сделанное количество итераций
              */
 
-            //РІС‹С‡РёСЃР»РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ С„СѓРЅРєС†РёРё РІ С‚РµРєСѓС‰РµР№ С‚РѕС‡РєРµ
+            //вычисление значения функции в текущей точке
             double fVal = func(kVals.currPoint);
-            //РІС‹С‡РёСЃР»РµРЅРёРµ РіСЂР°РґРёРµРЅС‚Р° РІ С‚РµРєСѓС‰РµР№ С‚РѕС‡РєРµ
+            //вычисление градиента в текущей точке
             kVals.currGrad = grad(kVals.currPoint);
-            //РЅР°С…РѕР¶РґРµРЅРёРµ РЅР°РїСЂР°РІР»РµРЅРёСЏ РѕРґРЅРѕРјРµСЂРЅРѕРіРѕ РїРѕРёСЃРєР° РёР· С‚РµРєСѓС‰РµР№ С‚РѕС‡РєРё
+            //нахождение направления одномерного поиска из текущей точки
             kVals.currDirection = -kVals.currGrad;
 
-            //РґРѕР±Р°РІР»РµРЅРёРµ РІ РЅР°РїСЂР°РІР»РµРЅРёРµ РїРѕРёСЃРєР° РµС‰С‘ РѕРґРЅРѕРіРѕ С‡Р»РµРЅР°: РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРј beta * РЅР°РїСЂР°РІР»РµРЅРёРµ РїРѕРёСЃРєР° РЅР° РїСЂРµРґС‹РґСѓС‰РµРј С€Р°РіРµ
-            //РµСЃР»Рё С‚РµРєСѓС‰РёР№ С€Р°Рі РЅРµ РєСЂР°С‚РµРЅ РєРѕР»РёС‡РµСЃС‚РІСѓ РїРµСЂРµРјРµРЅРЅС‹С… РІ С„СѓРЅРєС†РёРё
+            //добавление в направление поиска ещё одного члена: коэффициент beta * направление поиска на предыдущем шаге
+            //если текущий шаг не кратен количеству переменных в функции
             if (kVals.iter % kVals.currPoint.dim != 0)
             {
                 kVals.currDirection +=
-                    computePolRib_beta(kVals.currGrad, kVals.prevGrad) * kVals.prevDirection;
+                    computeFletReeves_beta(kVals.currGrad, kVals.prevGrad) * kVals.prevDirection;
             }
 
-            //РІС‹С‡РёСЃР»РµРЅРёРµ СЂРµР·СѓР»СЊС‚Р°С‚Р° РѕРґРЅРіРѕРјРµСЂРЅРѕРіРѕ РїРѕРёСЃРєР° РїРѕ Р·Р°РґР°РЅРЅРѕРјСѓ РЅР°РїСЂР°РІР»РµРЅРёСЋ
+            //вычисление результата однгомерного поиска по заданному направлению
             kVals.currPoint = new OneDimMinFinder(kVals.currPoint, kVals.currDirection, fPars).findMin();
 
-            //СЃРѕС…СЂР°РЅРµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ РіСЂР°РґРёРµРЅС‚Р°(С‚.Рє. РїСЂРё РІС‹С‡РёСЃР»РµРЅРёРё beta РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ РіСЂР°РґРёРµРЅС‚С‹ РЅР° С‚РµРєСѓС‰РµР№ Рё РїСЂРµРґС‹РґСѓС‰РµР№ РёС‚РµСЂР°С†РёРё)
+            //сохранение значения градиента(т.к. при вычислении beta используются градиенты на текущей и предыдущей итерации)
             kVals.prevGrad = kVals.currGrad;
-            //СЃРѕС…СЂР°РЅРµРЅРёРµ РЅР°РїСЂР°РІР»РµРЅРёСЏ
+            //сохранение направления
             kVals.prevDirection = kVals.currDirection;
             kVals.iter++;
 
-            // РЅРµ РёРјРµРµС‚ РЅРёРєР°РєРѕРіРѕ РѕС‚РЅРѕС€С‰РµРЅРёСЏ Рє Р°Р»РіРѕСЂРёС‚РјСѓ, СЃРѕС…СЂР°РЅРµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ РєР»СЋС‡РµРІС‹С… РїРµСЂРµРјРµРЅРЅС‹С… РґР»СЏ РїРѕСЃР»РµРґСѓСЋС‰РµРіРѕ РІС‹РІРѕРґР°
-            addKeyValsToTable(
+            // не имеет никакого отношщения к алгоритму, сохранение значения ключевых переменных для последующего вывода
+            /*addKeyValsToTable(
                 kVals.iter,
                 kVals.currPoint.ToString(),
                 kVals.currGrad.ToString(),
-                kVals.currDirection.ToString());
+                kVals.currDirection.ToString());*/
 
-            //РїСЂРѕРІРµСЂРєР° СѓСЃР»РѕРІРёР№ РѕРєРѕРЅС‡Р°РЅРёСЏ РїРѕРёСЃРєР°, РІ СЃР»СѓС‡Р°Рµ РёС… РЅРµ РІС‹РїРѕР»РЅРµРЅРёСЏ вЂ“
-            //СЂРµРєСѓСЂСЃРёРІРЅС‹Р№ РІС‹Р·РѕРІ СЌС‚РѕРіРѕ РјРµС‚РѕРґР° СЃРѕ Р·РЅР°С‡РµРЅРёСЏРјРё РїРѕР»СѓС‡РµРЅРЅС‹РјРё РЅР° С‚РµРєСѓС‰РµР№ РёС‚РµСЂР°С†РёРё
-            return (Point.norm(kVals.currGrad) > EPS && kVals.iter < MAX_ITER) ? M_PolakaRibiere() : kVals.currPoint;
+            //проверка условий окончания поиска, в случае их не выполнения –
+            //рекурсивный вызов этого метода со значениями полученными на текущей итерации
+            return (Point.norm(kVals.currGrad) > EPS && kVals.iter < MAX_ITER) ? M_ConjagateGrads() : kVals.currPoint;
 
         }
+
+        /*private Point M_MacCormack()
+        {
+            do
+            {
+                Matrix m;
+                int dim = kVals.currPoint.dim
+                if (kVals.iter % dim != 0)
+                {
+
+                }
+                else
+                {
+                    m = getIdentityMatr(dim);
+                    kVals.currGrad = grad(kVals.currPoint);
+                    kVals.currDirection = -kVals.currGrad;
+                }
+
+                kVals.prevPoint = kVals.currPoint;
+                kVals.currPoint = new OneDimMinFinder(fPars)
+                    .setStartPoint(kVals.currPoint)
+                    .setDirection(kVals.currDirection)
+                    .findMin();
+            }
+            while ((kVals.iter < MAX_ITER) && (Point.norm(kVals.currGrad) > EPS));
+        }
+
+        private Matrix compMacCormackMatrix(Matrix prevM, KeyVals kVals)
+        {
+
+        }*/
 
         private Point M_Paula1()
         {
 
-            //СЃРѕР·РґР°РЅРёРµ РѕР±СЉРµРєС‚Р° РґР»СЏ РѕРґРЅРѕРјРµСЂРЅРѕРіРѕ РїРѕРёСЃРєР°
+            //создание объекта для одномерного поиска
             OneDimMinFinder mF = new OneDimMinFinder(fPars);
-            // РїРѕР»СѓС‡РµРЅРёРµ РєРѕР»РёС‡РµС‚СЃРІР° РїРµСЂРµРјРµРЅРЅС‹С… Рё СЃРѕР·РґР°РЅРёРµ РѕРґРЅРѕРјРµСЂРЅРѕРіРѕ РјР°СЃРёРІР° РѕСЂС‚ РїРѕ РєР°Р¶РґРѕРјСѓ РёР· РёР·РјРµСЂРµРЅРёР№ 
-            //(РґР»СЏ dim = 2, directions = {{1,0}, {0,1}}
+            // получение количетсва переменных и создание одномерного масива орт по каждому из измерений 
+            //(для dim = 2, directions = {{1,0}, {0,1}}
             int dim = fPars.getDimensionality();
             Point[] directions = initStartDirsCGD(dim, dim);
 
             do
             {
-                //СЃРѕС…СЂР°РЅРµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ РІ С‚РµРєСѓС‰РµР№ С‚РѕС‡РєРµ(РґР°Р»РµРµ Р±СѓРґРµС‚ РёСЃРїРѕР»СЊР·РѕРІР°РЅРѕ РґР»СЏ РЅР°С…РѕР¶РґРµРЅРёСЏ РЅРѕРІРѕРіРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏ РїРѕРёСЃРєР°)
+                //сохранение значения в текущей точке(далее будет использовано для нахождения нового направления поиска)
                 kVals.prevPoint = kVals.currPoint;
 
-                // РѕРґРЅРѕРјРµСЂРЅС‹Р№ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅС‹Р№ РїРѕРёСЃРє РїРѕ РјР°СЃСЃРёРІСѓ РЅР°РїСЂР°РІР»РµРЅРёР№
+                // одномерный последовательный поиск по массиву направлений
                 for (int i = 0; i < dim; i++)
                 {
                     kVals.currPoint = mF.setStartPoint(kVals.currPoint).setDirection(directions[i]).findMin();
                 }
 
-                // РЅР°С…РѕР¶РґРµРЅРёРµ РЅРѕРІРѕРіРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏ РїРѕРёСЃРєР°
+                // нахождение нового направления поиска
                 Point newDir = kVals.currPoint - kVals.prevPoint;
                 
-                // РґРѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕРіРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏ РІ РјР°С‚СЂРёС†Сѓ РїРѕРёСЃРєРѕРІС‹С… РІРµРєС‚РѕСЂРѕРІ
+                // добавление нового направления в матрицу поисковых векторов
                 mPaula1AddDirection(directions, newDir);
                 kVals.currPoint = mF
                     .setStartPoint(kVals.currPoint)
@@ -240,7 +318,7 @@ namespace Part5
 
                 kVals.iter++;
 
-                // РЅРёРєР°Рє РЅРµ РѕС‚РЅРѕСЃРёС‚СЃСЏ Рє Р°Р»РіРѕСЂРёС‚РјСѓ
+                // никак не относится к алгоритму
                 addKeyValsToTable(
                     kVals.iter,
                     kVals.currPoint.ToString(),
@@ -251,7 +329,7 @@ namespace Part5
             return kVals.currPoint;
         }
 
-        // РјРµС‚РѕРґ РґР»СЏ СЃРґРІРёРіР° РІСЃРµС… РЅР°РїСЂР°РІР»РµРЅРёР№ РІРїСЂР°РІРѕ РЅР° 1 Рё РґРѕР±Р°РІР»РµРЅРёСЏ РЅРѕРІРѕРіРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏ РЅР° РјРµСЃС‚Рѕ РїРѕСЃР»РµРґРЅРµРіРѕ
+        // метод для сдвига всех направлений вправо на 1 и добавления нового направления на место последнего
         private void mPaula1AddDirection(Point[] directions, Point dir)
         {
             for (int i = 0; i < directions.Length - 1; i++)
@@ -276,10 +354,10 @@ namespace Part5
         private Point M_Paula2()
         {
 
-            //СЃРѕР·РґР°РЅРёРµ РѕР±СЉРµРєС‚Р° РґР»СЏ РѕРґРЅРѕРјРµСЂРЅРѕРіРѕ РїРѕРёСЃРєР°
+            //создание объекта для одномерного поиска
             OneDimMinFinder mF = new OneDimMinFinder(fPars);
-            // РїРѕР»СѓС‡РµРЅРёРµ РєРѕР»РёС‡РµС‚СЃРІР° РїРµСЂРµРјРµРЅРЅС‹С… Рё СЃРѕР·РґР°РЅРёРµ РѕРґРЅРѕРјРµСЂРЅРѕРіРѕ РјР°СЃРёРІР° РѕСЂС‚ РїРѕ РєР°Р¶РґРѕРјСѓ РёР· РёР·РјРµСЂРµРЅРёР№ 
-            //(РґР»СЏ dim = 2, directions = {{1,0}, {0,1}}
+            // получение количетсва переменных и создание одномерного масива орт по каждому из измерений 
+            //(для dim = 2, directions = {{1,0}, {0,1}}
             int dim = fPars.getDimensionality();
             Point[] directions = initStartDirsCGD(dim, dim + 1);
             directions[dim] = directions[0];
@@ -287,19 +365,19 @@ namespace Part5
             do
             {
                 kVals.currPoint = mF.setStartPoint(kVals.currPoint).setDirection(directions[0]).findMin();
-                //СЃРѕС…СЂР°РЅРµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ РІ С‚РµРєСѓС‰РµР№ С‚РѕС‡РєРµ(РґР°Р»РµРµ Р±СѓРґРµС‚ РёСЃРїРѕР»СЊР·РѕРІР°РЅРѕ РґР»СЏ РЅР°С…РѕР¶РґРµРЅРёСЏ РЅРѕРІРѕРіРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏ РїРѕРёСЃРєР°)
+                //сохранение значения в текущей точке(далее будет использовано для нахождения нового направления поиска)
                 kVals.prevPoint = kVals.currPoint;
 
-                // РѕРґРЅРѕРјРµСЂРЅС‹Р№ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅС‹Р№ РїРѕРёСЃРє РїРѕ РјР°СЃСЃРёРІСѓ РЅР°РїСЂР°РІР»РµРЅРёР№
+                // одномерный последовательный поиск по массиву направлений
                 for (int i = 1; i <= dim; i++)
                 {
                     kVals.currPoint = mF.setStartPoint(kVals.currPoint).setDirection(directions[i]).findMin();
                 }
 
-                // РЅР°С…РѕР¶РґРµРЅРёРµ РЅРѕРІРѕРіРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏ РїРѕРёСЃРєР°
+                // нахождение нового направления поиска
                 Point newDir = kVals.currPoint - kVals.prevPoint;
 
-                // РґРѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕРіРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏ РІ РјР°С‚СЂРёС†Сѓ РїРѕРёСЃРєРѕРІС‹С… РІРµРєС‚РѕСЂРѕРІ
+                // добавление нового направления в матрицу поисковых векторов
                 mPaula1AddDirection(directions, newDir);
                 directions[0] = newDir;
                 kVals.currPoint = mF
@@ -309,7 +387,7 @@ namespace Part5
 
                 kVals.iter++;
 
-                // РЅРёРєР°Рє РЅРµ РѕС‚РЅРѕСЃРёС‚СЃСЏ Рє Р°Р»РіРѕСЂРёС‚РјСѓ
+                // никак не относится к алгоритму
                 addKeyValsToTable(
                     kVals.iter,
                     kVals.currPoint.ToString(),
@@ -325,6 +403,12 @@ namespace Part5
         {
             return (((currG - prevG) * currG)/(prevG * prevG));
         }
+
+	   private double computeFletReeves_beta(Point currG, Point prevG)
+        {
+            return (currG * currG)/(prevG * prevG);
+        }
+
 
 
         private void initDTConjGrad()

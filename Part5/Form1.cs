@@ -119,7 +119,7 @@ namespace Part5
                     args,
                     dt,
                     textBox_Eps.Text == "" ? 1e-2 : double.Parse(textBox_Eps.Text),
-                    textBox_maxCountIter.Text == "" ? 10 : int.Parse(textBox_maxCountIter.Text)
+                    textBox_maxCountIter.Text == "" ? 30 : int.Parse(textBox_maxCountIter.Text)
                     );
             }
             catch(Exception ex)
@@ -127,8 +127,8 @@ namespace Part5
                 mf = new MinFinder(
                     richTextBox_func.Text,
                     dt,
-                    textBox_Eps.Text == "" ? 1e-2 : double.Parse(textBox_Eps.Text),
-                    textBox_maxCountIter.Text == "" ? 10 : int.Parse(textBox_maxCountIter.Text)
+                    1e-2,
+                    30
                     );
             }
 
