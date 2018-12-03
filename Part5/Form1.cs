@@ -104,37 +104,111 @@ namespace Part5
             if (!m.Success)
             {
                 MessageBox.Show("Error – Unbalanced brackets!!!");
-                //return;
+                return;
             }
 
-            DataTable dt = new DataTable();
-            dataGridView_keyVals.Font = new Font("Serif", 14);
-            MinFinder mf;
-            double[] args = null;
-            try
+            var parser = new FunctionParser(richTextBox_func.Text);
+
+            var restrictionForm = new RestrictionInputForm(parser.getFuncVars());
+            restrictionForm.ShowDialog();
+
+            var restrictions = restrictionForm.getRestrictions();
+
+            MessageBox.Show(
+                restrictions.Count() == parser.getFuncVars().Count()
+                ? "Ограничения успешно заданы"
+                : "Не получилось задать ограничения, попробуйте ещё раз");
+
+
+            IMininizer minimizer = null;
+
+            if (rbtn_genetic.Checked)
             {
-                args = textBox_paramsVals.Text.Trim(' ').Split(' ').Select(x => double.Parse(x)).ToArray();
-                mf = new MinFinder(
-                    richTextBox_func.Text,
-                    args,
-                    dt,
-                    textBox_Eps.Text == "" ? 1e-2 : double.Parse(textBox_Eps.Text),
-                    textBox_maxCountIter.Text == "" ? 30 : int.Parse(textBox_maxCountIter.Text)
-                    );
+                var algParams = new GeneticAlgorithmParamsForm();
+                algParams.ShowDialog();
+
+                minimizer = new GeneticAlgorithm(
+                restrictions.ToArray(),
+                algParams.iterCount,
+                algParams.individualCount,
+                algParams.crossoverProb,
+                algParams.mutationProb,
+                algParams.maxGenotypeDelta,
+                parser);
             }
-            catch(Exception ex)
+
+            if (rbtn_role.Checked)
             {
-                mf = new MinFinder(
-                    richTextBox_func.Text,
-                    dt,
-                    1e-2,
-                    30
-                    );
+                var algParams = new GeneticAlgorithmParamsForm();
+                algParams.ShowDialog();
+
+                minimizer = new GeneticAlgorithm(
+                restrictions.ToArray(),
+                algParams.iterCount,
+                algParams.individualCount,
+                algParams.crossoverProb,
+                algParams.mutationProb,
+                algParams.maxGenotypeDelta,
+                parser);
             }
 
-            dataGridView_keyVals.DataSource = dt;
-            label_funcMin.Text = mf.findMin().ToString();
 
+
+
+
+
+
+
+
+            //DataTable dt = new DataTable();
+            //dataGridView_keyVals.Font = new Font("Serif", 14);
+            //MinFinder mf;
+            //double[] args = null;
+            //try
+            //{
+            //    args = textBox_paramsVals.Text.Trim(' ').Split(' ').Select(x => double.Parse(x)).ToArray();
+            //    mf = new MinFinder(
+            //        richTextBox_func.Text,
+            //        args,
+            //        dt,
+            //        textBox_Eps.Text == "" ? 1e-2 : double.Parse(textBox_Eps.Text),
+            //        textBox_maxCountIter.Text == "" ? 30 : int.Parse(textBox_maxCountIter.Text)
+            //        );
+            //}
+            //catch(Exception ex)
+            //{
+            //    mf = new MinFinder(
+            //        richTextBox_func.Text,
+            //        dt,
+            //        1e-2,
+            //        30
+            //        );
+            //}
+
+            //dataGridView_keyVals.DataSource = dt;
+            label_funcMin.Text = minimizer.findMin().ToString();
+
+        }
+
+        private void btn_setRestrictions_Click(object sender, EventArgs e)
+        {
+            var parser = new FunctionParser(richTextBox_func.Text);
+
+            var restrictionForm = new RestrictionInputForm(parser.getFuncVars());
+            restrictionForm.ShowDialog();
+
+            var restrictions = restrictionForm.getRestrictions();
+
+            MessageBox.Show(
+                restrictions.Count() == parser.getFuncVars().Count()
+                ? "Ограничения успешно заданы"
+                : "Не получилось задать ограничения, попробуйте ещё раз");      
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            rbtn_genetic.Checked = true;
         }
     }
 }

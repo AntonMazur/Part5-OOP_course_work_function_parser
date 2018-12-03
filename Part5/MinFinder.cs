@@ -76,7 +76,8 @@ namespace Part5
         public MinFinder(
             string func, 
             double[] startPoint, 
-            DataTable dt, double EPS, 
+            DataTable dt, 
+            double EPS, 
             int maxIter
             ) : this(func, dt, EPS, maxIter)
         {
@@ -91,6 +92,7 @@ namespace Part5
             fPars = new FunctionParser(func);
             kVals = new KeyVals(fPars.getDimensionality());
         }
+
 
         public Point findMin()
         {

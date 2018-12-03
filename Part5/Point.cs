@@ -15,7 +15,12 @@ namespace Part5
         public double[] getCoords()
         {
             return (double[])coords.Clone();
-        }       
+        } 
+        
+        public double[] unsafeGetCoords()
+        {
+            return coords;
+        }
 
 
         public Point(int dim)

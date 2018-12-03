@@ -11,7 +11,7 @@ using System.IO;
 
 namespace Part5
 {
-    class FunctionParser
+    public class FunctionParser
     {
         private static Regex num;
         private static Regex binaryOp;
@@ -26,7 +26,7 @@ namespace Part5
         private string workingExp;
         private LinkedList<string> postfixForm;
         private double[] currPoint;
-        HashSet<string> vars;
+        LinkedList<string> vars;
 
 
 
@@ -45,11 +45,13 @@ namespace Part5
 
         public FunctionParser(string strFunc)
         {
-            vars = new HashSet<string>();
+            vars = new LinkedList<string>();
             this.originalExp = strFunc;
             convertToPostfixForm1();
             currPoint = new double[vars.Count];
         }
+
+        public LinkedList<String> getFuncVars() { return vars; }
 
         public int getDimensionality()
         {
@@ -163,7 +165,7 @@ namespace Part5
                 if (isUnarFuncWithVar())
                 {
                     Match m = unarFuncWithVar.Match(workingExp);
-                    vars.Add(m.Groups[2].Value);
+                    if (!vars.Contains(m.Groups[2].Value)) vars.AddLast(m.Groups[2].Value);
                     postfixForm.AddLast(m.Value);
                     workingExp = workingExp.Substring(m.Length);
                     continue;
@@ -172,7 +174,7 @@ namespace Part5
                 if (isVariable())
                 {
                     Match m = var.Match(workingExp);
-                    vars.Add(m.Value);
+                    if (!vars.Contains(m.Value)) vars.AddLast(m.Value);
                     postfixForm.AddLast(m.Value);
                     workingExp = workingExp.Substring(m.Length);
                     continue;
