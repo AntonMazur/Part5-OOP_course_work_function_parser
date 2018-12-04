@@ -139,53 +139,18 @@ namespace Part5
 
             if (rbtn_role.Checked)
             {
-                var algParams = new GeneticAlgorithmParamsForm();
+                var algParams = new SwarmAlgorithmParamsForm();
                 algParams.ShowDialog();
 
-                minimizer = new GeneticAlgorithm(
+                minimizer = new SwarmAlgorithm(
                 restrictions.ToArray(),
-                algParams.iterCount,
-                algParams.individualCount,
-                algParams.crossoverProb,
-                algParams.mutationProb,
-                algParams.maxGenotypeDelta,
+                algParams.iterationCount,
+                algParams.particleCount,
+                algParams.localMinWeight,
+                algParams.globalMinWeight,
                 parser);
             }
 
-
-
-
-
-
-
-
-
-            //DataTable dt = new DataTable();
-            //dataGridView_keyVals.Font = new Font("Serif", 14);
-            //MinFinder mf;
-            //double[] args = null;
-            //try
-            //{
-            //    args = textBox_paramsVals.Text.Trim(' ').Split(' ').Select(x => double.Parse(x)).ToArray();
-            //    mf = new MinFinder(
-            //        richTextBox_func.Text,
-            //        args,
-            //        dt,
-            //        textBox_Eps.Text == "" ? 1e-2 : double.Parse(textBox_Eps.Text),
-            //        textBox_maxCountIter.Text == "" ? 30 : int.Parse(textBox_maxCountIter.Text)
-            //        );
-            //}
-            //catch(Exception ex)
-            //{
-            //    mf = new MinFinder(
-            //        richTextBox_func.Text,
-            //        dt,
-            //        1e-2,
-            //        30
-            //        );
-            //}
-
-            //dataGridView_keyVals.DataSource = dt;
             label_funcMin.Text = minimizer.findMin().ToString();
 
         }

@@ -40,7 +40,6 @@
             this.button_clear = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.label_funcMin = new System.Windows.Forms.Label();
-            this.btn_setRestrictions = new System.Windows.Forms.Button();
             this.rbtn_genetic = new System.Windows.Forms.RadioButton();
             this.rbtn_role = new System.Windows.Forms.RadioButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -162,7 +161,7 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(189, 62);
             this.button1.TabIndex = 0;
-            this.button1.Text = "Run";
+            this.button1.Text = "Запустить";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -174,7 +173,7 @@
             this.button_clear.Name = "button_clear";
             this.button_clear.Size = new System.Drawing.Size(189, 68);
             this.button_clear.TabIndex = 7;
-            this.button_clear.Text = "Clear";
+            this.button_clear.Text = "Очистить";
             this.button_clear.UseVisualStyleBackColor = true;
             this.button_clear.Click += new System.EventHandler(this.button_clear_Click);
             // 
@@ -199,18 +198,6 @@
             this.label_funcMin.Size = new System.Drawing.Size(59, 34);
             this.label_funcMin.TabIndex = 20;
             this.label_funcMin.Text = "[...]";
-            // 
-            // btn_setRestrictions
-            // 
-            this.btn_setRestrictions.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btn_setRestrictions.Location = new System.Drawing.Point(53, 232);
-            this.btn_setRestrictions.Margin = new System.Windows.Forms.Padding(4);
-            this.btn_setRestrictions.Name = "btn_setRestrictions";
-            this.btn_setRestrictions.Size = new System.Drawing.Size(189, 75);
-            this.btn_setRestrictions.TabIndex = 21;
-            this.btn_setRestrictions.Text = "Задать ограничения";
-            this.btn_setRestrictions.UseVisualStyleBackColor = true;
-            this.btn_setRestrictions.Click += new System.EventHandler(this.btn_setRestrictions_Click);
             // 
             // rbtn_genetic
             // 
@@ -255,7 +242,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1793, 854);
             this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.btn_setRestrictions);
             this.Controls.Add(this.label_funcMin);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.dataGridView_keyVals);
@@ -291,7 +277,6 @@
         private System.Windows.Forms.Button button_clear;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label_funcMin;
-        private System.Windows.Forms.Button btn_setRestrictions;
         private System.Windows.Forms.RadioButton rbtn_genetic;
         private System.Windows.Forms.RadioButton rbtn_role;
         private System.Windows.Forms.GroupBox groupBox2;

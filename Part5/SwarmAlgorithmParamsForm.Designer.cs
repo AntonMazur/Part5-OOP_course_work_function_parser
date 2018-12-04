@@ -33,9 +33,9 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.tB_mutationProb = new System.Windows.Forms.TextBox();
-            this.tB_crossoverProb = new System.Windows.Forms.TextBox();
-            this.tB_individualsCount = new System.Windows.Forms.TextBox();
+            this.tB_globalMinImpact = new System.Windows.Forms.TextBox();
+            this.tB_localMinImpact = new System.Windows.Forms.TextBox();
+            this.tB_particleCount = new System.Windows.Forms.TextBox();
             this.tB_iterCount = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
@@ -49,6 +49,7 @@
             this.btn_ok.TabIndex = 40;
             this.btn_ok.Text = "Продолжить";
             this.btn_ok.UseVisualStyleBackColor = true;
+            this.btn_ok.Click += new System.EventHandler(this.btn_ok_Click);
             // 
             // label3
             // 
@@ -94,32 +95,32 @@
             this.label4.TabIndex = 34;
             this.label4.Text = "Количество итераций";
             // 
-            // tB_mutationProb
+            // tB_globalMinImpact
             // 
-            this.tB_mutationProb.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.tB_mutationProb.Location = new System.Drawing.Point(534, 218);
-            this.tB_mutationProb.Margin = new System.Windows.Forms.Padding(4);
-            this.tB_mutationProb.Name = "tB_mutationProb";
-            this.tB_mutationProb.Size = new System.Drawing.Size(297, 38);
-            this.tB_mutationProb.TabIndex = 33;
+            this.tB_globalMinImpact.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.tB_globalMinImpact.Location = new System.Drawing.Point(534, 218);
+            this.tB_globalMinImpact.Margin = new System.Windows.Forms.Padding(4);
+            this.tB_globalMinImpact.Name = "tB_globalMinImpact";
+            this.tB_globalMinImpact.Size = new System.Drawing.Size(297, 38);
+            this.tB_globalMinImpact.TabIndex = 33;
             // 
-            // tB_crossoverProb
+            // tB_localMinImpact
             // 
-            this.tB_crossoverProb.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.tB_crossoverProb.Location = new System.Drawing.Point(534, 162);
-            this.tB_crossoverProb.Margin = new System.Windows.Forms.Padding(4);
-            this.tB_crossoverProb.Name = "tB_crossoverProb";
-            this.tB_crossoverProb.Size = new System.Drawing.Size(297, 38);
-            this.tB_crossoverProb.TabIndex = 32;
+            this.tB_localMinImpact.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.tB_localMinImpact.Location = new System.Drawing.Point(534, 162);
+            this.tB_localMinImpact.Margin = new System.Windows.Forms.Padding(4);
+            this.tB_localMinImpact.Name = "tB_localMinImpact";
+            this.tB_localMinImpact.Size = new System.Drawing.Size(297, 38);
+            this.tB_localMinImpact.TabIndex = 32;
             // 
-            // tB_individualsCount
+            // tB_particleCount
             // 
-            this.tB_individualsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.tB_individualsCount.Location = new System.Drawing.Point(534, 105);
-            this.tB_individualsCount.Margin = new System.Windows.Forms.Padding(4);
-            this.tB_individualsCount.Name = "tB_individualsCount";
-            this.tB_individualsCount.Size = new System.Drawing.Size(297, 38);
-            this.tB_individualsCount.TabIndex = 31;
+            this.tB_particleCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.tB_particleCount.Location = new System.Drawing.Point(534, 105);
+            this.tB_particleCount.Margin = new System.Windows.Forms.Padding(4);
+            this.tB_particleCount.Name = "tB_particleCount";
+            this.tB_particleCount.Size = new System.Drawing.Size(297, 38);
+            this.tB_particleCount.TabIndex = 31;
             // 
             // tB_iterCount
             // 
@@ -140,9 +141,9 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.tB_mutationProb);
-            this.Controls.Add(this.tB_crossoverProb);
-            this.Controls.Add(this.tB_individualsCount);
+            this.Controls.Add(this.tB_globalMinImpact);
+            this.Controls.Add(this.tB_localMinImpact);
+            this.Controls.Add(this.tB_particleCount);
             this.Controls.Add(this.tB_iterCount);
             this.Name = "SwarmAlgorithmParamsForm";
             this.Text = "SwarmAlgorithmParamsForm";
@@ -158,9 +159,9 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox tB_mutationProb;
-        private System.Windows.Forms.TextBox tB_crossoverProb;
-        private System.Windows.Forms.TextBox tB_individualsCount;
+        private System.Windows.Forms.TextBox tB_globalMinImpact;
+        private System.Windows.Forms.TextBox tB_localMinImpact;
+        private System.Windows.Forms.TextBox tB_particleCount;
         private System.Windows.Forms.TextBox tB_iterCount;
     }
 }
